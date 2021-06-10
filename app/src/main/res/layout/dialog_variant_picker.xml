@@ -27,18 +27,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/title_product">
 
-        <include layout="@layout/list_item_variant" />
-
-        <include layout="@layout/list_item_variant" />
-
-        <include layout="@layout/list_item_variant" />
-
-        <include layout="@layout/list_item_variant" />
-
-        <include layout="@layout/list_item_variant" />
-
-        <include layout="@layout/list_item_variant" />
-
     </LinearLayout>
 
     <com.google.android.material.button.MaterialButton

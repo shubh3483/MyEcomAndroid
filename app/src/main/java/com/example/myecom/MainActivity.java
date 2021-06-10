@@ -8,6 +8,7 @@ import android.os.Handler;
 import com.example.myecom.databinding.ActivityMainBinding;
 import com.example.myecom.databinding.DialogVariantPickerBinding;
 import com.example.myecom.databinding.DialogWeightPickerBinding;
+import com.example.myecom.databinding.ListItemVariantBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class MainActivity extends AppCompatActivity {
@@ -36,6 +37,9 @@ public class MainActivity extends AppCompatActivity {
             new MaterialAlertDialogBuilder(MainActivity.this, R.style.CustomDialogTheme)
                     .setView(variantPickerBinding.getRoot())
                     .show();
+
+            ListItemVariantBinding listItemBinding = ListItemVariantBinding.inflate(getLayoutInflater());
+            variantPickerBinding.listVariants.addView(listItemBinding.getRoot());
         });
     }
 }
