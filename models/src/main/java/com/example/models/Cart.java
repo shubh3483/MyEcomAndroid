@@ -10,12 +10,12 @@ public class Cart {
     /**
      * Total amount of all items in cart
      */
-    float totalAmount;
+    public float totalAmount;
 
     /**
      * To number of items in cart
      */
-    int numberOfItems;
+    public int numberOfItems;
 
     /**
      * Map of all items in cart
