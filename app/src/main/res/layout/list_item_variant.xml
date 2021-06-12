@@ -7,6 +7,7 @@
     <com.google.android.material.chip.Chip
         android:id="@+id/chip"
         style="@style/Widget.MaterialComponents.Chip.Filter"
+        android:checkable="false"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="500g - ₹80"
@@ -15,7 +16,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
-        android:id="@+id/btn_add"
+        android:id="@+id/btn_inc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="?attr/selectableItemBackgroundBorderless"
@@ -31,13 +32,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:text="3"
-        app:layout_constraintBottom_toBottomOf="@+id/btn_add"
-        app:layout_constraintEnd_toStartOf="@+id/btn_add"
-        app:layout_constraintTop_toTopOf="@+id/btn_add" />
+        android:text="0"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_inc"
+        app:layout_constraintEnd_toStartOf="@+id/btn_inc"
+        app:layout_constraintTop_toTopOf="@+id/btn_inc" />
 
     <ImageButton
-        android:id="@+id/btn_remove"
+        android:id="@+id/btn_dec"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
@@ -52,12 +53,13 @@
         android:id="@+id/zero_qty_grp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:constraint_referenced_ids="btn_add" />
+        app:constraint_referenced_ids="btn_inc" />
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/non_zero_qty_grp"
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:constraint_referenced_ids="btn_remove,tv_qty" />
+        app:constraint_referenced_ids="btn_dec,tv_qty" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

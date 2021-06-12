@@ -1,6 +1,7 @@
 package com.example.myecom;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.content.SharedPreferences;
@@ -76,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCartUpdated(int itemPosition) {
                 updateCartSummary();
-                adapter.notifyItemChanged(itemPosition);
+                adapter.notifyDataSetChanged();
             }
         };
 
@@ -84,6 +85,11 @@ public class MainActivity extends AppCompatActivity {
         adapter = new ProductsAdapter(this, products, cart, listener);
         mainBinding.list.setLayoutManager(new LinearLayoutManager(this));
         mainBinding.list.setAdapter(adapter);
+
+        // To add dividers into the recycler view
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mainBinding.list.getContext(),
+                LinearLayoutManager.VERTICAL);
+        mainBinding.list.addItemDecoration(dividerItemDecoration);
     }
 
     /**
@@ -91,8 +97,8 @@ public class MainActivity extends AppCompatActivity {
      */
     public void updateCartSummary(){
         // Setting the new summary
-        mainBinding.tvTotalItems.setText(cart.numberOfItems + " items");
-        mainBinding.tvTotalAmount.setText("₹" + cart.totalAmount);
+        mainBinding.tvTotalItems.setText(String.format("%d items", cart.numberOfItems));
+        mainBinding.tvTotalAmount.setText(String.format("₹%.2f", cart.totalAmount));
     }
 
     /**
