@@ -61,7 +61,7 @@ public class ProductsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // Checking the type and creating view holder accordingly
-        if(viewType == ProductType.TYPE_VARIANT_BASED_PRODUCT){
+        if(viewType == ProductType.TYPE_WEIGHT_BASED_PRODUCT){
             ItemWbProductBinding binding = ItemWbProductBinding.inflate(LayoutInflater.from(context), parent, false);
             return new WBViewHolder(binding);
         } else {

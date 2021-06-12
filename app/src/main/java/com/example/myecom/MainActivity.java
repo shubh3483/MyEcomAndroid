@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Cart of the items
      */
-    private Cart cart;
+    private Cart cart = new Cart();
 
     /**
      * Adapter for the recycler view
