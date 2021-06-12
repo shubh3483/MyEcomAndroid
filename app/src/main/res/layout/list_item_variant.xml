@@ -5,7 +5,7 @@
     android:layout_height="wrap_content">
 
     <com.google.android.material.chip.Chip
-        android:id="@+id/chip4"
+        android:id="@+id/chip"
         style="@style/Widget.MaterialComponents.Chip.Filter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
         app:layout_constraintTop_toTopOf="@+id/btn_add" />
 
     <ImageButton
-        android:id="@+id/btn_remove_all"
+        android:id="@+id/btn_remove"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
@@ -58,6 +58,6 @@
         android:id="@+id/non_zero_qty_grp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:constraint_referenced_ids="btn_remove_all,tv_qty" />
+        app:constraint_referenced_ids="btn_remove,tv_qty" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
