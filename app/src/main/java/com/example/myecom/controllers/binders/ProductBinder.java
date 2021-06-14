@@ -152,6 +152,7 @@ public class ProductBinder {
                 });
         vbProductBinding.vbProductName.setText(product.name);
         vbProductBinding.vbProductName.setSelected(true);
+        vbProductBinding.noOfVariantsTV.setText(product.variants.size() + " variants");
 
         // Inflating the variants
         // Checking for the variants available if only one variant then change the name of the item
