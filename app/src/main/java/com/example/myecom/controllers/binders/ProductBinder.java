@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,7 +21,6 @@ import com.example.myecom.MainActivity;
 import com.example.myecom.R;
 import com.example.myecom.databinding.ChipItemVariantBinding;
 import com.example.myecom.databinding.DialogVariantPickerBinding;
-import com.example.myecom.databinding.DialogWeightPickerBinding;
 import com.example.myecom.databinding.ItemVbProductBinding;
 import com.example.myecom.databinding.ItemWbProductBinding;
 import com.example.myecom.databinding.ListItemVariantBinding;
@@ -112,8 +110,8 @@ public class ProductBinder {
         checkWBProductInCart(wbProductBinding, product);
 
         // Setup the button
-        wbProductBinding.addBtn.setOnClickListener(view -> setupDialog(wbProductBinding, product));
-        wbProductBinding.wbEditBtn.setOnClickListener(view -> setupDialog(wbProductBinding, product));
+        wbProductBinding.addBtn.setOnClickListener(view -> triggerDialog(wbProductBinding, product));
+        wbProductBinding.wbEditBtn.setOnClickListener(view -> triggerDialog(wbProductBinding, product));
     }
 
     /**
@@ -223,7 +221,7 @@ public class ProductBinder {
         }
     }
 
-    // Increasing/Decreasing quantity methods
+    // Increasing/Decreasing quantity methods for variant based product
 
     /**
      * Increment the quantity of the product by 1
@@ -245,7 +243,7 @@ public class ProductBinder {
             mListener.onCartUpdated();
             return;
         }
-        setupDialog(vbProductBinding, product);
+        triggerDialog(vbProductBinding, product);
     }
 
     /**
@@ -270,49 +268,21 @@ public class ProductBinder {
             mListener.onCartUpdated();
             return;
         }
-        setupDialog(vbProductBinding, product);
+        triggerDialog(vbProductBinding, product);
     }
 
-    // Generating dialog methods
+    // Triggering dialog methods
 
     /**
      * To setup the dialog to add or edit the product
      * @param wbProductBinding binding of the item in the recycler view
      * @param product product to be added or edited
      */
-    private void setupDialog(ItemWbProductBinding wbProductBinding, Product product) {
-        // Setup the dialog and showing it
-        DialogWeightPickerBinding wbDialogBinding = DialogWeightPickerBinding.inflate(inflater);
-        dialog = new MaterialAlertDialogBuilder(mContext, R.style.CustomDialogTheme)
-                .setView(wbDialogBinding.getRoot())
-                .setCancelable(false)
-                .show();
-
-        // Setting name of the product
-        wbDialogBinding.titleProduct.setText(product.name);
-
-        // Setup values for the pickers
-        ArrayList<String> kilogramValues = new ArrayList<>();
-        ArrayList<String> gramValues = new ArrayList<>();
-        setupNumberPickers(wbDialogBinding, product, kilogramValues, gramValues);
-
-        // Setup buttons
-        wbDialogBinding.btnSave.setOnClickListener(v -> {
-            // Get selected quantity from number picker
-            String kg = kilogramValues.get(wbDialogBinding.pickerKg.getValue()).replace("kg", ""),
-                    gm = gramValues.get(wbDialogBinding.pickerG.getValue()).replace("g", "");
-
-            // Adding the item in the cart
-            float quantity = Float.parseFloat(kg) + Float.parseFloat(gm) / 1000;
-
-            // Checking quantity entered
-            if (quantity < product.minQty) {
-                Toast.makeText(mContext, "Minimum " + product.minQty + " kg needs to be selected", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            save(wbProductBinding, product, quantity);
+    private void triggerDialog(ItemWbProductBinding wbProductBinding, Product product) {
+        weightPickerDialog.show(product, () -> {
+            checkWBProductInCart(wbProductBinding, product);
+            mListener.onCartUpdated();
         });
-        wbDialogBinding.btnRemove.setOnClickListener(v -> remove(wbProductBinding, product));
     }
 
     /**
@@ -320,218 +290,13 @@ public class ProductBinder {
      * @param vbProductBinding binding of the item in the recycler view
      * @param product product to be added or edited
      */
-    private void setupDialog(ItemVbProductBinding vbProductBinding, Product product) {
-        DialogVariantPickerBinding vbDialogBinding = DialogVariantPickerBinding.inflate(inflater);
-        dialog = new MaterialAlertDialogBuilder(mContext, R.style.CustomDialogTheme)
-                .setView(vbDialogBinding.getRoot())
-                .setCancelable(false)
-                .show();
-
-        //Set up variants quantity picker dialog
-        vbDialogBinding.titleProduct.setText(product.name);
-
-        // Set the variants list and get the list of bindings of the variants
-        List<ListItemVariantBinding> itemVariants = setupVariants(vbDialogBinding, product);
-
-
-        vbDialogBinding.btnSave.setOnClickListener(v -> save(vbProductBinding, product, itemVariants));
-
-        vbDialogBinding.btnRemoveAll.setOnClickListener(v -> remove(vbProductBinding, product));
-    }
-
-    // Saving methods
-
-    /**
-     * To save the changes made to an product
-     * @param wbProductBinding binding of the item in the recycler view
-     * @param product product to be saved
-     * @param quantity quantity of the product to be saved
-     */
-    private void save(ItemWbProductBinding wbProductBinding, Product product, float quantity) {
-        // Add the item into the cart
-        mCart.add(product, quantity);
-
-        // Update the item UI
-        wbProductBinding.nonZeroQtyGroup.setVisibility(View.VISIBLE);
-        wbProductBinding.wbQtyTV.setText(String.format("%.2fkg", quantity));
-        wbProductBinding.addBtn.setVisibility(View.INVISIBLE);
-
-        // Callback for the item change
-        mListener.onCartUpdated();
-        // Finish the dialog
-        dialog.dismiss();
-    }
-
-    /**
-     * To save the changes made to an product
-     * @param vbProductBinding binding of the item in the recycler view
-     * @param product product to be saved
-     * @param itemVariants list of variants of the product
-     */
-    private void save(ItemVbProductBinding vbProductBinding, Product product, List<ListItemVariantBinding> itemVariants) {
-        // Firstly we have to remove all variants from the cart
-        mCart.removeAllVariantsOfVariantBasedProduct(product);
-
-        // Total quantity of all the variants of the product
-        int quantity = 0;
-        // Add product variants to cart according to selected quantity
-        for (int i = 0; i < product.variants.size(); i++){
-            ListItemVariantBinding listItemVariant = itemVariants.get(i);
-            quantity += Integer.parseInt(listItemVariant.tvQty.getText().toString());
-
-            // Add the particular variant continuously
-            for (int j = 0; j < Integer.parseInt(listItemVariant.tvQty.getText().toString()); j++){
-                mCart.add(product, product.variants.get(i));
+    private void triggerDialog(ItemVbProductBinding vbProductBinding, Product product) {
+        variantsQtyPickerDialog.show(product, new VariantsQtyPickerDialog.VariantsQtyPickerCompleteListener() {
+            @Override
+            public void onCompleted() {
+                checkVBProductInCart(vbProductBinding, product);
+                mListener.onCartUpdated();
             }
-        }
-
-        // Update data in variant based binding
-        if (quantity == 0) {
-            vbProductBinding.vbNonZeroQtyGrp.setVisibility(View.GONE);
-        } else {
-            vbProductBinding.vbNonZeroQtyGrp.setVisibility(View.VISIBLE);
-        }
-
-        // Set the quantity in the text field
-        vbProductBinding.vbQtyTV.setText(String.valueOf(quantity));
-
-        //Callback to update cart
-        mListener.onCartUpdated();
-        dialog.dismiss();
-    }
-
-    // Removing product completely methods
-
-    /**
-     * Remove the product from the cart completely
-     * @param wbProductBinding binding of the item in the recycler view
-     * @param product product to be removed
-     */
-    private void remove(ItemWbProductBinding wbProductBinding, Product product) {
-        // If item not in cart then just close the dialog
-        if (!mCart.cartItems.containsKey(product.name)) {
-            dialog.dismiss();
-            return;
-        }
-
-        // Removing the item from the cart
-        mCart.remove(product);
-
-        // Update the binding for the product
-        checkWBProductInCart(wbProductBinding, product);
-
-        // Callback for the item change
-        mListener.onCartUpdated();
-        dialog.dismiss();
-    }
-
-    /**
-     * Remove all variants of the product from the cart completely
-     * @param vbProductBinding binding of the item in the recycler view
-     * @param product product to be removed
-     */
-    private void remove(ItemVbProductBinding vbProductBinding, Product product) {
-        // Remove all variants from cart
-        mCart.removeAllVariantsOfVariantBasedProduct(product);
-
-        // Update UI of recycler view
-        vbProductBinding.vbNonZeroQtyGrp.setVisibility(View.GONE);
-
-        // Callback to update cart
-        mListener.onCartUpdated();
-        dialog.dismiss();
-    }
-
-    // Utility methods
-
-    /**
-     * Setup number picker for the weight based products
-     * @param wbDialogBinding binding of the item in the recycler view
-     * @param product product for which the number picker is to be saved
-     * @param kilogramValues values to be set for kilograms
-     * @param gramValues values to be set for grams
-     */
-    private void setupNumberPickers(DialogWeightPickerBinding wbDialogBinding, Product product, ArrayList<String> kilogramValues, ArrayList<String> gramValues) {
-        // Setting Number Picker for kilograms
-        int minIndex = 0;
-        for (int i = 0; i <= 10; i++) {
-            if (i < (int) product.minQty) {
-                minIndex++;
-            }
-            kilogramValues.add(i + "kg");
-        }
-        wbDialogBinding.pickerKg.setMaxValue(10);
-        wbDialogBinding.pickerKg.setDisplayedValues((String[]) kilogramValues.subList(4, 9).toArray());
-
-        // Setting Number Picker for grams
-        for (int i = 0; i < 20; i++) {
-            gramValues.add(i * 50 + "g");
-        }
-        wbDialogBinding.pickerG.setMaxValue(19);
-        wbDialogBinding.pickerG.setDisplayedValues((String[]) gramValues.subList(3, 9).toArray());
-
-        // Checking for the product availability in the cart
-        // If find then update the previous quantity
-        if (mCart.cartItems.containsKey(product.name)){
-            // Extracting the weight unit from the cart for the particular item
-            // We have used 3 decimal places here to get the grams in 3 decimal places
-            String[] quantityString = String.format("%.3f", mCart.cartItems.get(product.name).qty).split("\\.");
-            int kilogram = Integer.parseInt(quantityString[0]),
-                    gram = Integer.parseInt(quantityString[1]);
-
-            // Setting the values to the picker
-            wbDialogBinding.pickerKg.setValue(kilogram);
-            wbDialogBinding.pickerG.setValue(gram/50);
-        }
-    }
-
-    /**
-     * Setup variants list for the variant based products
-     * @param vbDialogBinding binding of the item in the recycler view
-     * @param product product for which the number picker is to be saved
-     */
-    private List<ListItemVariantBinding> setupVariants(DialogVariantPickerBinding vbDialogBinding, Product product) {
-        // Make a list of variants
-        List<ListItemVariantBinding> itemVariants = new ArrayList<>();
-
-        // Add variant items in the list
-        for (int i = 0; i < product.variants.size(); i++){
-            // Inflating the view
-            ListItemVariantBinding listItemVariant = ListItemVariantBinding.inflate(inflater);
-            float price = product.variants.get(i).price;
-            listItemVariant.chip.setText(String.format("%s - ₹%.2f", product.variants.get(i).name, price));
-
-            // Checking the availability of the particular variant in the cart
-            // If true then update the cart accordingly
-            if (mCart.cartItems.containsKey(product.name + " " + product.variants.get(i).name)){
-                int quantity = (int) mCart.cartItems.get(product.name + " " + product.variants.get(i).name).qty;
-                listItemVariant.tvQty.setText(String.valueOf(quantity));
-                listItemVariant.nonZeroQtyGrp.setVisibility(View.VISIBLE);
-            }
-
-            // Adding the binding in the list
-            itemVariants.add(listItemVariant);
-
-            // Handling Increment button
-            listItemVariant.btnInc.setOnClickListener(v -> {
-                int quantity = Integer.parseInt(listItemVariant.tvQty.getText().toString());
-                listItemVariant.tvQty.setText(String.valueOf(++quantity));
-                listItemVariant.nonZeroQtyGrp.setVisibility(View.VISIBLE);
-            });
-
-            // Handling decrement button
-            listItemVariant.btnDec.setOnClickListener(v -> {
-                int quantity = Integer.parseInt(listItemVariant.tvQty.getText().toString());
-                if (--quantity == 0) {
-                    listItemVariant.nonZeroQtyGrp.setVisibility(View.GONE);
-                }
-                listItemVariant.tvQty.setText(String.valueOf(quantity));
-            });
-
-            // Adding the variant in the dialog
-            vbDialogBinding.listVariants.addView(listItemVariant.getRoot());
-        }
-
-        return itemVariants;
+        });
     }
 }
