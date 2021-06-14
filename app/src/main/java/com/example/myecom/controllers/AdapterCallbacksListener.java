@@ -9,5 +9,5 @@ public interface AdapterCallbacksListener {
      * When a item in the cart updated
      * @param itemPosition position of the item
      */
-    void onCartUpdated(int itemPosition);
+    void onCartUpdated();
 }

@@ -73,13 +73,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private void setupAdapter() {
         // Defining the listener
-        AdapterCallbacksListener listener = new AdapterCallbacksListener() {
-            @Override
-            public void onCartUpdated(int itemPosition) {
-                updateCartSummary();
-                adapter.notifyDataSetChanged();
-            }
-        };
+        AdapterCallbacksListener listener = () -> updateCartSummary();
 
         // Defining the adapter and setting it to the list
         adapter = new ProductsAdapter(this, products, cart, listener);

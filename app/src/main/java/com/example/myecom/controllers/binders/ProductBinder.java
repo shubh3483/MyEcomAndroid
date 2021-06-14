@@ -26,6 +26,8 @@ import com.example.myecom.databinding.DialogWeightPickerBinding;
 import com.example.myecom.databinding.ItemVbProductBinding;
 import com.example.myecom.databinding.ItemWbProductBinding;
 import com.example.myecom.databinding.ListItemVariantBinding;
+import com.example.myecom.dialogs.VariantsQtyPickerDialog;
+import com.example.myecom.dialogs.WeightPickerDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
@@ -60,6 +62,9 @@ public class ProductBinder {
      */
     private AlertDialog dialog;
 
+    private final WeightPickerDialog weightPickerDialog;
+    private final VariantsQtyPickerDialog variantsQtyPickerDialog;
+
     /**
      * To initialize the object
      * @param context context of the main activity
@@ -70,7 +75,9 @@ public class ProductBinder {
         this.mContext = context;
         this.mCart = cart;
         this.mListener = listener;
-        this.inflater = ((MainActivity) mContext).getLayoutInflater();
+        this.inflater = ((MainActivity) context).getLayoutInflater();
+        this.weightPickerDialog = new WeightPickerDialog(context, cart);
+        this.variantsQtyPickerDialog = new VariantsQtyPickerDialog(context, cart);
     }
 
     // Binding methods
@@ -110,25 +117,6 @@ public class ProductBinder {
     }
 
     /**
-     * To check the product available in the cart or not
-     * @param wbProductBinding binding for the item in the recycler view
-     * @param product product to be checked
-     */
-    private void checkWBProductInCart(ItemWbProductBinding wbProductBinding, Product product) {
-        // Check for product availability in cart
-        // If available then update the item accordingly
-        if (mCart.cartItems.containsKey(product.name)){
-            wbProductBinding.nonZeroQtyGroup.setVisibility(View.VISIBLE);
-            wbProductBinding.addBtn.setVisibility(View.INVISIBLE);
-            wbProductBinding.wbQtyTV.setText(String.format("%.2fkg", mCart.cartItems.get(product.name).qty));
-        } else {
-            wbProductBinding.nonZeroQtyGroup.setVisibility(View.INVISIBLE);
-            wbProductBinding.addBtn.setVisibility(View.VISIBLE);
-            wbProductBinding.wbQtyTV.setText("");
-        }
-    }
-
-    /**
      * To bind variant based product
      * @param vbProductBinding binding for the item in the recycler view
      * @param product product to be bind
@@ -156,7 +144,6 @@ public class ProductBinder {
 
         // Inflating the variants
         // Checking for the variants available if only one variant then change the name of the item
-
         vbProductBinding.variantsGrp.removeAllViews();
         if (product.variants.size() == 1) {
             vbProductBinding.arrowBtn.setVisibility(View.GONE);
@@ -188,6 +175,27 @@ public class ProductBinder {
 
         // If only one variant then action directly
         vbProductBinding.minusBtn.setOnClickListener(v -> decreaseQuantity(vbProductBinding, product));
+    }
+
+    // Checking item in cart methods
+
+    /**
+     * To check the product available in the cart or not
+     * @param wbProductBinding binding for the item in the recycler view
+     * @param product product to be checked
+     */
+    private void checkWBProductInCart(ItemWbProductBinding wbProductBinding, Product product) {
+        // Check for product availability in cart
+        // If available then update the item accordingly
+        if (mCart.cartItems.containsKey(product.name)){
+            wbProductBinding.nonZeroQtyGroup.setVisibility(View.VISIBLE);
+            wbProductBinding.addBtn.setVisibility(View.INVISIBLE);
+            wbProductBinding.wbQtyTV.setText(String.format("%.2fkg", mCart.cartItems.get(product.name).qty));
+        } else {
+            wbProductBinding.nonZeroQtyGroup.setVisibility(View.INVISIBLE);
+            wbProductBinding.addBtn.setVisibility(View.VISIBLE);
+            wbProductBinding.wbQtyTV.setText("");
+        }
     }
 
     /**
@@ -234,7 +242,7 @@ public class ProductBinder {
             mCart.add(product, product.variants.get(0));
             // Make the non zero group visible
             vbProductBinding.vbNonZeroQtyGrp.setVisibility(View.VISIBLE);
-            mListener.onCartUpdated(0);
+            mListener.onCartUpdated();
             return;
         }
         setupDialog(vbProductBinding, product);
@@ -259,7 +267,7 @@ public class ProductBinder {
                 // Make the non zero group visible
                 vbProductBinding.vbNonZeroQtyGrp.setVisibility(View.GONE);
             }
-            mListener.onCartUpdated(0);
+            mListener.onCartUpdated();
             return;
         }
         setupDialog(vbProductBinding, product);
@@ -284,15 +292,15 @@ public class ProductBinder {
         wbDialogBinding.titleProduct.setText(product.name);
 
         // Setup values for the pickers
-        String[] kilogramValues = new String[11];
-        String[] gramValues = new String[20];
+        ArrayList<String> kilogramValues = new ArrayList<>();
+        ArrayList<String> gramValues = new ArrayList<>();
         setupNumberPickers(wbDialogBinding, product, kilogramValues, gramValues);
 
         // Setup buttons
         wbDialogBinding.btnSave.setOnClickListener(v -> {
             // Get selected quantity from number picker
-            String kg = kilogramValues[wbDialogBinding.pickerKg.getValue()].replace("kg", ""),
-                    gm = gramValues[wbDialogBinding.pickerG.getValue()].replace("g", "");
+            String kg = kilogramValues.get(wbDialogBinding.pickerKg.getValue()).replace("kg", ""),
+                    gm = gramValues.get(wbDialogBinding.pickerG.getValue()).replace("g", "");
 
             // Adding the item in the cart
             float quantity = Float.parseFloat(kg) + Float.parseFloat(gm) / 1000;
@@ -349,7 +357,7 @@ public class ProductBinder {
         wbProductBinding.addBtn.setVisibility(View.INVISIBLE);
 
         // Callback for the item change
-        mListener.onCartUpdated(0);
+        mListener.onCartUpdated();
         // Finish the dialog
         dialog.dismiss();
     }
@@ -388,7 +396,7 @@ public class ProductBinder {
         vbProductBinding.vbQtyTV.setText(String.valueOf(quantity));
 
         //Callback to update cart
-        mListener.onCartUpdated(0);
+        mListener.onCartUpdated();
         dialog.dismiss();
     }
 
@@ -409,12 +417,11 @@ public class ProductBinder {
         // Removing the item from the cart
         mCart.remove(product);
 
-        //Update data in wbProduct binding
-        wbProductBinding.addBtn.setVisibility(View.VISIBLE);
-        wbProductBinding.nonZeroQtyGroup.setVisibility(View.GONE);
+        // Update the binding for the product
+        checkWBProductInCart(wbProductBinding, product);
 
         // Callback for the item change
-        mListener.onCartUpdated(0);
+        mListener.onCartUpdated();
         dialog.dismiss();
     }
 
@@ -431,7 +438,7 @@ public class ProductBinder {
         vbProductBinding.vbNonZeroQtyGrp.setVisibility(View.GONE);
 
         // Callback to update cart
-        mListener.onCartUpdated(0);
+        mListener.onCartUpdated();
         dialog.dismiss();
     }
 
@@ -444,20 +451,24 @@ public class ProductBinder {
      * @param kilogramValues values to be set for kilograms
      * @param gramValues values to be set for grams
      */
-    private void setupNumberPickers(DialogWeightPickerBinding wbDialogBinding, Product product, String[] kilogramValues, String[] gramValues) {
+    private void setupNumberPickers(DialogWeightPickerBinding wbDialogBinding, Product product, ArrayList<String> kilogramValues, ArrayList<String> gramValues) {
         // Setting Number Picker for kilograms
+        int minIndex = 0;
         for (int i = 0; i <= 10; i++) {
-            kilogramValues[i] = i + "kg";
+            if (i < (int) product.minQty) {
+                minIndex++;
+            }
+            kilogramValues.add(i + "kg");
         }
         wbDialogBinding.pickerKg.setMaxValue(10);
-        wbDialogBinding.pickerKg.setDisplayedValues(kilogramValues);
+        wbDialogBinding.pickerKg.setDisplayedValues((String[]) kilogramValues.subList(4, 9).toArray());
 
         // Setting Number Picker for grams
         for (int i = 0; i < 20; i++) {
-            gramValues[i] = i * 50 + "g";
+            gramValues.add(i * 50 + "g");
         }
         wbDialogBinding.pickerG.setMaxValue(19);
-        wbDialogBinding.pickerG.setDisplayedValues(gramValues);
+        wbDialogBinding.pickerG.setDisplayedValues((String[]) gramValues.subList(3, 9).toArray());
 
         // Checking for the product availability in the cart
         // If find then update the previous quantity
