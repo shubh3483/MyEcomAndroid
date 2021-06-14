@@ -79,6 +79,7 @@ public class VariantsQtyPickerDialog {
         List<ListItemVariantBinding> itemVariants = new ArrayList<>();
 
         // Add variant items in the list
+        vbDialogBinding.listVariants.removeAllViews();
         for (int i = 0; i < product.variants.size(); i++){
             // Inflating the view
             ListItemVariantBinding listItemVariant = ListItemVariantBinding.inflate(((MainActivity) mContext).getLayoutInflater());
@@ -91,6 +92,9 @@ public class VariantsQtyPickerDialog {
                 int quantity = (int) mCart.cartItems.get(product.name + " " + product.variants.get(i).name).qty;
                 listItemVariant.tvQty.setText(String.valueOf(quantity));
                 listItemVariant.nonZeroQtyGrp.setVisibility(View.VISIBLE);
+            } else {
+                listItemVariant.tvQty.setText("0");
+                listItemVariant.nonZeroQtyGrp.setVisibility(View.INVISIBLE);
             }
 
             // Adding the binding in the list
