@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.models.Cart;
 import com.example.models.Product;
 import com.example.models.ProductType;
-import com.example.myecom.controllers.Binders.ProductBinder;
+import com.example.myecom.controllers.binders.ProductBinder;
 import com.example.myecom.databinding.ItemVbProductBinding;
 import com.example.myecom.databinding.ItemWbProductBinding;
 import com.example.myecom.controllers.holders.VBViewHolder;

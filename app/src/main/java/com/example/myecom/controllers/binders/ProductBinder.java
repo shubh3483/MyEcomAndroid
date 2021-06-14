@@ -1,4 +1,4 @@
-package com.example.myecom.controllers.Binders;
+package com.example.myecom.controllers.binders;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -101,17 +101,31 @@ public class ProductBinder {
         wbProductBinding.wbProductName.setSelected(true);
         wbProductBinding.wbPrice.setText(String.format("₹%.2f/kg", product.pricePerKg));
 
+        // To check if product is already in cart
+        checkWBProductInCart(wbProductBinding, product);
+
+        // Setup the button
+        wbProductBinding.addBtn.setOnClickListener(view -> setupDialog(wbProductBinding, product));
+        wbProductBinding.wbEditBtn.setOnClickListener(view -> setupDialog(wbProductBinding, product));
+    }
+
+    /**
+     * To check the product available in the cart or not
+     * @param wbProductBinding binding for the item in the recycler view
+     * @param product product to be checked
+     */
+    private void checkWBProductInCart(ItemWbProductBinding wbProductBinding, Product product) {
         // Check for product availability in cart
         // If available then update the item accordingly
         if (mCart.cartItems.containsKey(product.name)){
             wbProductBinding.nonZeroQtyGroup.setVisibility(View.VISIBLE);
             wbProductBinding.addBtn.setVisibility(View.INVISIBLE);
             wbProductBinding.wbQtyTV.setText(String.format("%.2fkg", mCart.cartItems.get(product.name).qty));
+        } else {
+            wbProductBinding.nonZeroQtyGroup.setVisibility(View.INVISIBLE);
+            wbProductBinding.addBtn.setVisibility(View.VISIBLE);
+            wbProductBinding.wbQtyTV.setText("");
         }
-
-        // Setup the button
-        wbProductBinding.addBtn.setOnClickListener(view -> setupDialog(wbProductBinding, product));
-        wbProductBinding.wbEditBtn.setOnClickListener(view -> setupDialog(wbProductBinding, product));
     }
 
     /**
@@ -155,20 +169,7 @@ public class ProductBinder {
             }
         }
 
-        // Update binding accordingly if product is already in the cart
-        int quantity = 0;
-        for (int i = 0; i < product.variants.size(); i++){
-            if (mCart.cartItems.containsKey(product.name + " " + product.variants.get(i).name)){
-                quantity += mCart.cartItems.get(product.name + " " + product.variants.get(i).name).qty;
-            }
-        }
-
-        // Checking for the quantity
-        // If greater than 0 the make the non zero group visible
-        if (quantity > 0) {
-            vbProductBinding.vbNonZeroQtyGrp.setVisibility(View.VISIBLE);
-            vbProductBinding.vbQtyTV.setText(String.valueOf(quantity));
-        }
+        checkVBProductInCart(vbProductBinding, product);
 
         // Handling arrow buttons
         vbProductBinding.arrowBtn.setOnClickListener(v -> {
@@ -186,6 +187,31 @@ public class ProductBinder {
 
         // If only one variant then action directly
         vbProductBinding.minusBtn.setOnClickListener(v -> decreaseQuantity(vbProductBinding, product));
+    }
+
+    /**
+     * To check the product available in the cart or not
+     * @param vbProductBinding binding for the item in the recycler view
+     * @param product product to be checked
+     */
+    private void checkVBProductInCart(ItemVbProductBinding vbProductBinding, Product product) {
+        // Update binding accordingly if product is already in the cart
+        int quantity = 0;
+        for (int i = 0; i < product.variants.size(); i++){
+            if (mCart.cartItems.containsKey(product.name + " " + product.variants.get(i).name)){
+                quantity += mCart.cartItems.get(product.name + " " + product.variants.get(i).name).qty;
+            }
+        }
+
+        // Checking for the quantity
+        // If greater than 0 the make the non zero group visible
+        if (quantity > 0) {
+            vbProductBinding.vbNonZeroQtyGrp.setVisibility(View.VISIBLE);
+            vbProductBinding.vbQtyTV.setText(String.valueOf(quantity));
+        } else {
+            vbProductBinding.vbNonZeroQtyGrp.setVisibility(View.GONE);
+            vbProductBinding.vbQtyTV.setText("0");
+        }
     }
 
     // Increasing/Decreasing quantity methods
