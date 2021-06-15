@@ -127,6 +127,9 @@ public class WeightPickerDialog {
         wbDialogBinding.pickerKg.setMaxValue(kilogramArray.length - 1);
 
         wbDialogBinding.pickerKg.setOnValueChangedListener((picker, oldVal, newVal) -> {
+            String[] grams = wbDialogBinding.pickerG.getDisplayedValues();
+             String g = grams[wbDialogBinding.pickerG.getValue()];
+
             String[] kilograms = picker.getDisplayedValues();
             String kg = kilograms[picker.getValue()].replace("kg", "");
 
@@ -148,6 +151,11 @@ public class WeightPickerDialog {
             }
             setGramsNumberPicker(gramArray);
 
+            for (int i = 0; i < gramArray.length; i++) {
+                if (gramArray[i].equals(g)) {
+                    wbDialogBinding.pickerG.setValue(i);
+                }
+            }
         });
 
         // Minimum value for gram number picker
