@@ -8,7 +8,6 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
@@ -16,20 +15,13 @@ import com.bumptech.glide.request.transition.Transition;
 import com.example.models.Cart;
 import com.example.models.Product;
 import com.example.models.Variant;
-import com.example.myecom.controllers.AdapterCallbacksListener;
 import com.example.myecom.MainActivity;
-import com.example.myecom.R;
+import com.example.myecom.controllers.AdapterCallbacksListener;
 import com.example.myecom.databinding.ChipItemVariantBinding;
-import com.example.myecom.databinding.DialogVariantPickerBinding;
 import com.example.myecom.databinding.ItemVbProductBinding;
 import com.example.myecom.databinding.ItemWbProductBinding;
-import com.example.myecom.databinding.ListItemVariantBinding;
 import com.example.myecom.dialogs.VariantsQtyPickerDialog;
 import com.example.myecom.dialogs.WeightPickerDialog;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Represent binder for the product
@@ -56,11 +48,13 @@ public class ProductBinder {
     private final LayoutInflater inflater;
 
     /**
-     * Dialog for the product
+     * For weight picker dialog
      */
-    private AlertDialog dialog;
-
     private final WeightPickerDialog weightPickerDialog;
+
+    /**
+     * For variant picker dialog
+     */
     private final VariantsQtyPickerDialog variantsQtyPickerDialog;
 
     /**
@@ -291,12 +285,9 @@ public class ProductBinder {
      * @param product product to be added or edited
      */
     private void triggerDialog(ItemVbProductBinding vbProductBinding, Product product) {
-        variantsQtyPickerDialog.show(product, new VariantsQtyPickerDialog.VariantsQtyPickerCompleteListener() {
-            @Override
-            public void onCompleted() {
-                checkVBProductInCart(vbProductBinding, product);
-                mListener.onCartUpdated();
-            }
+        variantsQtyPickerDialog.show(product, () -> {
+            checkVBProductInCart(vbProductBinding, product);
+            mListener.onCartUpdated();
         });
     }
 }
