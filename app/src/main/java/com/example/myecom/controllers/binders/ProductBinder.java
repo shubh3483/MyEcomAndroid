@@ -136,6 +136,7 @@ public class ProductBinder {
 
         // Inflating the variants
         // Checking for the variants available if only one variant then change the name of the item
+        vbProductBinding.arrowBtn.setVisibility(View.VISIBLE);
         vbProductBinding.variantsGrp.removeAllViews();
         if (product.variants.size() == 1) {
             vbProductBinding.arrowBtn.setVisibility(View.GONE);

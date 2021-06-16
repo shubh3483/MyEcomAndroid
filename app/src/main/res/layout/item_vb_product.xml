@@ -57,21 +57,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
+                android:layout_marginBottom="16dp"
                 android:text="2 variants"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toRightOf="@id/vbImageView"
-                app:layout_constraintTop_toBottomOf="@id/vbProductName" />
+                app:layout_constraintTop_toBottomOf="@id/vbProductName"
+                app:layout_constraintVertical_bias="0.0" />
 
             <ImageButton
                 android:id="@+id/arrowBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_arrow_drop_down"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toRightOf="@id/noOfVariantsTV"
                 app:layout_constraintTop_toBottomOf="@id/vbProductName"
-                app:layout_constraintVertical_bias="0.0"
                 app:tint="@color/black" />
 
             <com.google.android.material.chip.ChipGroup
